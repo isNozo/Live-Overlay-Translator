@@ -1,22 +1,26 @@
+from PySide6.QtCore import QThread
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
-def start_capture(window_name):
-    """Start capturing the specified window."""
-    capture = WindowsCapture(
-        cursor_capture=False,
-        draw_border=False,
-        monitor_index=None,
-        window_name=window_name,
-    )
+class CaptureThread(QThread):
+    def __init__(self, window_name, process_frame):
+        super().__init__()
+        self.capture = WindowsCapture(
+            cursor_capture=False,
+            draw_border=False,
+            monitor_index=None,
+            window_name=window_name,
+        )
 
-    @capture.event
-    def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl):
-        frame.save_as_image("./image.png")
-        capture_control.stop()
+        @self.capture.event
+        def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl):
+            # print("Frame Arrived")
+            frame.save_as_image("image.png")
+            process_frame()
 
-    @capture.event
-    def on_closed():
-        print("Capture Session Closed")
+        @self.capture.event
+        def on_closed():
+            print("Capture Session Closed")
 
-    capture.start_free_threaded()
-    return capture
+    def run(self):
+        self.capture.start()
+

@@ -1,7 +1,7 @@
 import sys
 from PySide6 import QtWidgets, QtCore
 from helpers import select_window, calculate_coordinates
-from window_capture import start_capture
+from window_capture import CaptureThread
 from overlay_window import OverlayWindow
 from text_recognition import TextRecognizer
 from translator import Translator
@@ -10,7 +10,7 @@ class TranslationOverlay:
     def __init__(self):
         self.window_name = select_window()
         self.coordinates = calculate_coordinates(self.window_name)
-        self.capture = start_capture(self.window_name)
+        self.capture_thread = CaptureThread(self.window_name, self.process_frame)
         self.app = QtWidgets.QApplication(sys.argv)
         self.overlay = OverlayWindow(self.coordinates)
         self.ocr = TextRecognizer(lang='en')
@@ -27,8 +27,6 @@ class TranslationOverlay:
             scores = [line[1][1] for line in result]
             self.overlay.update_results(boxes, txts, scores)
 
-        self.capture.start_free_threaded()
-
     def quit_application(self):
         """Clean up and quit application"""
         self.running = False
@@ -39,10 +37,8 @@ class TranslationOverlay:
         """Main application loop"""
         self.overlay.show()
 
-        # Create timer for periodic frame processing
-        timer = QtCore.QTimer()
-        timer.timeout.connect(self.process_frame)
-        timer.start(16)  # Process frame every second
+        # start capture thread
+        self.capture_thread.start()
         
         # Start event loop
         self.app.exec()

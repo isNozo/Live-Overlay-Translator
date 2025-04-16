@@ -1,37 +1,48 @@
-from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtCore import Qt, QTimer
+from PySide6 import QtGui, QtCore
+from helpers import get_window_rect
 
-class OverlayWindow(QtWidgets.QWidget):
-    def __init__(self, coordinates):
+class OverlayWindow(QWidget):
+    def __init__(self, target_title):
         super().__init__()
-        self.setWindowFlags(
-            QtCore.Qt.Window | 
-            QtCore.Qt.FramelessWindowHint | 
-            QtCore.Qt.WindowStaysOnTopHint | 
-            QtCore.Qt.Tool
-        )
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        self.setAttribute(QtCore.Qt.WA_ShowWithoutActivating)
-
-        self.setGeometry(
-            coordinates['left'],
-            coordinates['top'],
-            coordinates['width'],
-            coordinates['height']
-        )
-        
-        # Create system tray icon
-        self.tray_icon = QtWidgets.QSystemTrayIcon(
-            QtGui.QIcon(QtGui.QPixmap(32, 32))  # Placeholder icon
-        )
-        self.tray_icon.show()
-        
-        # Create tray menu
-        tray_menu = QtWidgets.QMenu()
-        quit_action = tray_menu.addAction("Exit")
-        quit_action.triggered.connect(QtWidgets.QApplication.quit)
-        self.tray_icon.setContextMenu(tray_menu)
-        
+        self.target_title = target_title
         self.results = []
+        
+        # Set a frameless, always-on-top transparent window
+        self.setWindowFlags(
+            Qt.Window | 
+            Qt.FramelessWindowHint | 
+            Qt.WindowStaysOnTopHint | 
+            Qt.Tool
+        )
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0); border: 2px solid #00AAFF;")
+
+        # Resize the overlay window to match the target window
+        rect = get_window_rect(self.target_title)
+        if rect:
+            self.setGeometry(*rect)
+        else:
+            # Default size if the target window is not found
+            self.setGeometry(100, 100, 400, 300)
+
+        # Set a timer to update the position of the overlay window
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_position)
+        self.timer.start(16)
+
+        # Note: The label is not used for displaying text, but is required to create the QWidget
+        layout = QVBoxLayout()
+        label = QLabel("")
+        layout.addWidget(label)
+        self.setLayout(layout)
+
+    def update_position(self):
+        rect = get_window_rect(self.target_title)
+        if rect:
+            self.setGeometry(*rect)
 
     def update_results(self, boxes, txts, scores):
         """Update the text to be displayed"""

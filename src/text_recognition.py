@@ -13,8 +13,8 @@ class TextRecognizer:
         try:
             results = self.ocr.ocr(image_path, rec=True)  # Enable text recognition
             if not results or not results[0]:
-                return None, []
+                return None
             return results[0]
         except Exception as e:
             print(f"Failed to process image: {e}")
-            return None, []
+            return None

@@ -1,3 +1,4 @@
+import torch # Note: This is a workaround for the issue with paddleocr https://github.com/PaddlePaddle/PaddleOCR/issues/14979
 from paddleocr import PaddleOCR
 from ppocr.utils.logging import get_logger
 import logging

@@ -3,6 +3,7 @@ from helpers import get_window_titles
 from overlay_window import OverlayWindow
 from window_capture import CaptureThread
 from text_recognition import TextRecognizer
+from translator import Translator
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -10,6 +11,7 @@ class MainWindow(QMainWindow):
         self.sub_window = None
         self.selected_window = None
         self.ocr = TextRecognizer(lang='en')
+        self.translator = Translator()
 
         self.setWindowTitle("Live Overlay Translator")
 
@@ -59,6 +61,6 @@ class MainWindow(QMainWindow):
         
         if result is not None:
             boxes = [line[0] for line in result]
-            txts = [line[1][0] for line in result]
+            txts = [self.translator.translate_text(line[1][0]) for line in result]
             scores = [line[1][1] for line in result]
             self.sub_window.update_results(boxes, txts, scores)

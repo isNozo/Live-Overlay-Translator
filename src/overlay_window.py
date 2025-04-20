@@ -14,7 +14,8 @@ class OverlayWindow(QWidget):
             Qt.Window | 
             Qt.FramelessWindowHint | 
             Qt.WindowStaysOnTopHint | 
-            Qt.Tool
+            Qt.Tool |
+            Qt.WindowTransparentForInput
         )
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)

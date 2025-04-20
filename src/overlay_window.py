@@ -18,7 +18,7 @@ class OverlayWindow(QWidget):
         )
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
-        self.setStyleSheet("background-color: rgba(0, 0, 0, 0); border: 2px solid #00AAFF;")
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
 
         # Resize the overlay window to match the target window
         rect = get_window_rect(self.target_title)
@@ -52,8 +52,13 @@ class OverlayWindow(QWidget):
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        
+        # Draw a border around the overlay window
+        pen = QtGui.QPen(QtGui.QColor("#00AAFF"), 2)
+        painter.setPen(pen)
+        painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
 
-        # Set semi-transparent green pen
+        # Set pen for drawing text and boxes
         pen = QtGui.QPen(QtGui.QColor(0, 255, 0, 200), 2)
         painter.setPen(pen)
 

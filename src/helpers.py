@@ -14,9 +14,15 @@ def get_window_titles():
 
 def get_window_rect(title):
     hwnd = win32gui.FindWindow(None, title)
-    if hwnd:
-        rect = win32gui.GetWindowRect(hwnd)
-        if rect:
-            left, top, right, bottom = rect
-            return (left, top, right - left, bottom - top)
-    return None
+    if not hwnd:
+        return None
+
+    # Get the size of the client area
+    client_rect = list(win32gui.GetClientRect(hwnd))
+    
+    # Convert the top-left coordinates of the client area to screen coordinates
+    left, top = win32gui.ClientToScreen(hwnd, (0, 0))
+    # Convert the bottom-right coordinates of the client area to screen coordinates
+    right, bottom = win32gui.ClientToScreen(hwnd, (client_rect[2], client_rect[3]))
+    
+    return (left, top, right - left, bottom - top)

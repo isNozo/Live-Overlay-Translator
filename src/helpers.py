@@ -1,4 +1,13 @@
 import win32gui
+from ctypes import windll, byref, Structure, c_int, sizeof
+
+class RECT(Structure):
+    _fields_ = [
+        ('left', c_int),
+        ('top', c_int),
+        ('right', c_int),
+        ('bottom', c_int)
+    ]
 
 def get_window_titles():
     titles = []
@@ -13,16 +22,22 @@ def get_window_titles():
     return titles
 
 def get_window_rect(title):
-    hwnd = win32gui.FindWindow(None, title)
-    if not hwnd:
-        return None
+    try:
+        hwnd = win32gui.FindWindow(None, title)
+        if not hwnd:
+            return None
 
-    # Get the size of the client area
-    client_rect = list(win32gui.GetClientRect(hwnd))
-    
-    # Convert the top-left coordinates of the client area to screen coordinates
-    left, top = win32gui.ClientToScreen(hwnd, (0, 0))
-    # Convert the bottom-right coordinates of the client area to screen coordinates
-    right, bottom = win32gui.ClientToScreen(hwnd, (client_rect[2], client_rect[3]))
-    
-    return (left, top, right - left, bottom - top)
+        # Get the window rect
+        rect = RECT()
+        windll.dwmapi.DwmGetWindowAttribute(
+            hwnd,
+            9,  # DWMWA_EXTENDED_FRAME_BOUNDS
+            byref(rect),
+            sizeof(rect)
+        )
+        
+        width = rect.right - rect.left
+        height = rect.bottom - rect.top
+        return (rect.left, rect.top, width, height)
+    except Exception:
+        return None

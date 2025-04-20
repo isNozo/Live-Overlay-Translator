@@ -10,9 +10,9 @@ class TextRecognizer:
         logger.setLevel(logging.ERROR)
 
 
-    def recognize_text(self, image_path):
+    def recognize_text(self, frame_buffer):
         try:
-            results = self.ocr.ocr(image_path, rec=True)  # Enable text recognition
+            results = self.ocr.ocr(frame_buffer, rec=True)  # Enable text recognition
             if not results or not results[0]:
                 return None
             return results[0]

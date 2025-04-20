@@ -28,8 +28,8 @@ class CaptureThread(QThread):
                 self.frame_count = 0
                 self.last_time = current_time
 
-            frame.save_as_image("image.png")
-            process_frame()
+            #frame.save_as_image("image.png")
+            process_frame(frame.frame_buffer)
 
             if not self.running:
                 capture_control.stop()

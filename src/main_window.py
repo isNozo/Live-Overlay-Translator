@@ -55,12 +55,13 @@ class MainWindow(QMainWindow):
             self.sub_window.close()
         super().closeEvent(event)
     
-    def process_frame(self):
+    def process_frame(self, frame_buffer):
         """Process captured frame"""
-        result = self.ocr.recognize_text("./image.png")
+        result = self.ocr.recognize_text(frame_buffer)
         
         if result is not None:
             boxes = [line[0] for line in result]
-            txts = [self.translator.translate_text(line[1][0]) for line in result]
+            # txts = [self.translator.translate_text(line[1][0]) for line in result]
+            txts = [line[1][0] for line in result]
             scores = [line[1][1] for line in result]
             self.sub_window.update_results(boxes, txts, scores)

@@ -23,6 +23,8 @@ class MainWindow(QMainWindow):
         window_titles = get_window_titles()
         self.selected_window = window_titles[0] if window_titles else None
         self.combobox = QComboBox()
+        self.combobox.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.combobox.setMinimumContentsLength(28)
         self.combobox.addItems(window_titles)
         self.combobox.currentTextChanged.connect(self.update_text)
         

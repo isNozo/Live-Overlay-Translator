@@ -67,12 +67,44 @@ class OverlayWindow(QWidget):
         font = QtGui.QFont("Arial", 10)
         painter.setFont(font)
 
+        # Set text background brush
+        text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 180))
+
         for box, txt, score in self.results:
             # Draw bounding box
             polygon = QtGui.QPolygonF([QtCore.QPointF(float(x), float(y)) for x, y in box])
             painter.drawPolygon(polygon)
 
+            # Calculate box dimensions
+            x_coords = [p[0] for p in box]
+            y_coords = [p[1] for p in box]
+            box_left = min(x_coords)
+            box_top = min(y_coords)
+            box_width = max(x_coords) - box_left
+            box_height = max(y_coords) - box_top
+
             # Draw text and confidence score
             text = f"{txt} ({score:.2f})"
-            text_position = QtCore.QPointF(float(box[0][0]), float(box[0][1] - 10))
+            
+            # Calculate text rectangle
+            font_metrics = QtGui.QFontMetrics(font)
+            text_rect = font_metrics.boundingRect(text)
+            
+            # Position text inside the box
+            text_x = box_left
+            text_y = box_top + 12
+            text_position = QtCore.QPointF(text_x, text_y)
+            
+            # Calculate background rectangle
+            bg_rect = QtCore.QRectF(
+                box_left,
+                box_top,
+                box_width,
+                box_height
+            )
+            
+            # Draw text background
+            painter.fillRect(bg_rect, text_bg)
+            
+            # Draw text
             painter.drawText(text_position, text)

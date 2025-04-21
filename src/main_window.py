@@ -67,9 +67,10 @@ class MainWindow(QMainWindow):
 
     def close_sub_window(self):
         if self.sub_window:
+            self.capture_thread.stop()
+            self.capture_thread = None
             self.sub_window.close()
             self.sub_window = None
-            self.capture_thread.stop()
 
     def closeEvent(self, event):
         if self.sub_window is not None:

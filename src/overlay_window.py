@@ -84,7 +84,8 @@ class OverlayWindow(QWidget):
             box_height = max(y_coords) - box_top
 
             # Draw text and confidence score
-            text = f"{txt} ({score:.2f})"
+            # text = f"{txt} ({score:.2f})"
+            text = f"{txt}"
             
             # Calculate text rectangle
             font_metrics = QtGui.QFontMetrics(font)

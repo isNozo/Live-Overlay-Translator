@@ -82,10 +82,9 @@ class MainWindow(QMainWindow):
         result = self.ocr.recognize_text(frame_buffer)
         
         if result is not None:
-            boxes = [line[0] for line in result]
-            # txts = [self.translator.translate_text(line[1][0]) for line in result]
-            txts = [line[1][0] for line in result]
-            scores = [line[1][1] for line in result]
+            boxes = result[0]["rec_polys"]
+            txts = result[0]["rec_texts"]
+            scores = result[0]["rec_scores"]
             self.sub_window.update_results(boxes, txts, scores)
 
     def refresh_window_list(self):

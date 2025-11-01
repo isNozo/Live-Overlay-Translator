@@ -1,14 +1,15 @@
-import torch # Note: This is a workaround for the issue with paddleocr https://github.com/PaddlePaddle/PaddleOCR/issues/14979
 from paddleocr import PaddleOCR
-from ppocr.utils.logging import get_logger
-import logging
 import re
 
 class TextRecognizer:
     def __init__(self, lang='en'):
-        self.ocr = PaddleOCR(lang=lang, drop_score=0.9, use_angle_cls=False, det_limit_side_len=1980)
-        logger = get_logger()
-        logger.setLevel(logging.ERROR)
+        self.ocr = PaddleOCR(
+            text_detection_model_name="PP-OCRv5_mobile_det",
+            text_recognition_model_name="PP-OCRv5_mobile_rec",
+            use_doc_orientation_classify=False,
+            use_doc_unwarping=False,
+            use_textline_orientation=False,
+            )
 
     def is_valid_text(self, text):
         # Check if the text contains only numbers and symbols
@@ -17,17 +18,8 @@ class TextRecognizer:
 
     def recognize_text(self, frame_buffer):
         try:
-            results = self.ocr.ocr(frame_buffer, rec=True, cls=False)  # Enable text recognition
-            if not results or not results[0]:
-                return None
-            
-            # Filter out results that contain only numbers and symbols
-            filtered_results = [
-                result for result in results[0]
-                if self.is_valid_text(result[1][0])
-            ]
-            
-            return filtered_results if filtered_results else None
+            result = self.ocr.predict(frame_buffer)
+            return result
         except Exception as e:
             print(f"Failed to process image: {e}")
             return None

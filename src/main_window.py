@@ -6,6 +6,7 @@ from overlay_window import OverlayWindow
 from window_capture import CaptureThread
 from text_recognition import TextRecognizer
 from translator import Translator
+from itertools import chain
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -82,10 +83,9 @@ class MainWindow(QMainWindow):
         result = self.ocr.recognize_text(frame_buffer)
         
         if result is not None:
-            boxes = result[0]["rec_polys"]
-            txts = result[0]["rec_texts"]
-            scores = result[0]["rec_scores"]
-            self.sub_window.update_results(boxes, txts, scores)
+            boxes = list(chain.from_iterable(result[0]["text_word_boxes"]))
+            txts = list(chain.from_iterable(result[0]["text_word"]))
+            self.sub_window.update_results(boxes, txts)
 
     def refresh_window_list(self):
         """Refresh the window titles in the combobox"""

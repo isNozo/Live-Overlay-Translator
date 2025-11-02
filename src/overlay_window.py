@@ -45,9 +45,9 @@ class OverlayWindow(QWidget):
         if rect:
             self.setGeometry(*rect)
 
-    def update_results(self, boxes, txts, scores):
+    def update_results(self, boxes, txts):
         """Update the text to be displayed"""
-        self.results = list(zip(boxes, txts, scores))
+        self.results = list(zip(boxes, txts))
         self.update()
 
     def paintEvent(self, event):
@@ -70,28 +70,15 @@ class OverlayWindow(QWidget):
         # Set text background brush
         text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 180))
 
-        for box, txt, score in self.results:
-            # Draw bounding box
-            polygon = QtGui.QPolygonF([QtCore.QPointF(float(x), float(y)) for x, y in box])
-            painter.drawPolygon(polygon)
-
+        for box, txt in self.results:
             # Calculate box dimensions
-            x_coords = [p[0] for p in box]
-            y_coords = [p[1] for p in box]
-            box_left = min(x_coords)
-            box_top = min(y_coords)
-            box_width = max(x_coords) - box_left
-            box_height = max(y_coords) - box_top
+            box_left = box[0]
+            box_top = box[1]
+            box_width = box[2] - box_left
+            box_height = box[3] - box_top
 
-            # Draw text and confidence score
-            # text = f"{txt} ({score:.2f})"
-            text = f"{txt}"
-            
-            # Calculate text rectangle
-            font_metrics = QtGui.QFontMetrics(font)
-            text_rect = font_metrics.boundingRect(text)
-            
             # Position text inside the box
+            text = f"{txt}"
             text_x = box_left
             text_y = box_top + 12
             text_position = QtCore.QPointF(text_x, text_y)

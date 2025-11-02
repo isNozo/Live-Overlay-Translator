@@ -9,6 +9,7 @@ class TextRecognizer:
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=False,
+            text_det_limit_side_len=1920,
             )
 
     def is_valid_text(self, text):
@@ -18,7 +19,7 @@ class TextRecognizer:
 
     def recognize_text(self, frame_buffer):
         try:
-            result = self.ocr.predict(frame_buffer)
+            result = self.ocr.predict(frame_buffer, return_word_box=True)
             return result
         except Exception as e:
             print(f"Failed to process image: {e}")

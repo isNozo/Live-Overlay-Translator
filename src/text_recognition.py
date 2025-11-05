@@ -1,5 +1,15 @@
 from paddleocr import PaddleOCR
+from dataclasses import dataclass
+from itertools import chain
 import re
+
+@dataclass
+class TextBox:
+    text: str
+    x: int
+    y: int
+    w: int
+    h: int
 
 class TextRecognizer:
     def __init__(self, lang='en'):
@@ -12,6 +22,18 @@ class TextRecognizer:
             text_det_limit_side_len=1920,
             )
 
+    def zip_with(func, *iterables):
+        return [func(*args) for args in zip(*iterables)]
+
+    def toTextBox(text, box):
+        return TextBox(
+            text=text,
+            x=box[0],
+            y=box[1],
+            w=box[2] - box[0],
+            h=box[3] - box[1]
+            )
+
     def is_valid_text(self, text):
         # Check if the text contains only numbers and symbols
         only_numbers_symbols = re.match(r'^[\d\W]+$', text) is not None
@@ -20,7 +42,14 @@ class TextRecognizer:
     def recognize_text(self, frame_buffer):
         try:
             result = self.ocr.predict(frame_buffer, return_word_box=True)
-            return result
+
+            if not result:
+                return None
+            else:
+                return TextRecognizer.zip_with(TextRecognizer.toTextBox,
+                                               list(chain.from_iterable(result[0]["text_word"])),
+                                               list(chain.from_iterable(result[0]["text_word_boxes"]))
+                                               )
         except Exception as e:
             print(f"Failed to process image: {e}")
             return None

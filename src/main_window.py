@@ -83,9 +83,7 @@ class MainWindow(QMainWindow):
         result = self.ocr.recognize_text(frame_buffer)
         
         if result is not None:
-            boxes = list(chain.from_iterable(result[0]["text_word_boxes"]))
-            txts = list(chain.from_iterable(result[0]["text_word"]))
-            self.sub_window.update_results(boxes, txts)
+            self.sub_window.update_results(result)
 
     def refresh_window_list(self):
         """Refresh the window titles in the combobox"""

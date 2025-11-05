@@ -45,9 +45,8 @@ class OverlayWindow(QWidget):
         if rect:
             self.setGeometry(*rect)
 
-    def update_results(self, boxes, txts):
-        """Update the text to be displayed"""
-        self.results = list(zip(boxes, txts))
+    def update_results(self, result):
+        self.results = result
         self.update()
 
     def paintEvent(self, event):
@@ -70,25 +69,19 @@ class OverlayWindow(QWidget):
         # Set text background brush
         text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 180))
 
-        for box, txt in self.results:
-            # Calculate box dimensions
-            box_left = box[0]
-            box_top = box[1]
-            box_width = box[2] - box_left
-            box_height = box[3] - box_top
-
+        for textbox in self.results:
             # Position text inside the box
-            text = f"{txt}"
-            text_x = box_left
-            text_y = box_top + 12
+            text = f"{textbox.text}"
+            text_x = textbox.x
+            text_y = textbox.y + 12
             text_position = QtCore.QPointF(text_x, text_y)
             
             # Calculate background rectangle
             bg_rect = QtCore.QRectF(
-                box_left,
-                box_top,
-                box_width,
-                box_height
+                textbox.x,
+                textbox.y,
+                textbox.w,
+                textbox.h
             )
             
             # Draw text background

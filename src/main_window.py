@@ -1,19 +1,14 @@
 from PySide6.QtWidgets import (QMainWindow, QComboBox, QPushButton, QWidget, 
                              QVBoxLayout, QHBoxLayout, QStyle)
 from PySide6.QtCore import QSize
-from helpers import get_window_titles
-from overlay_window import OverlayWindow
-from window_capture import CaptureThread
-from text_recognition import TextRecognizer
-from translator import Translator
-from itertools import chain
+import logging
 
 class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.sub_window = None
-        self.ocr = TextRecognizer(lang='en')
-        self.translator = Translator()
+    def __init__(self, get_window_titles):
+        super().__init__()        
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        self.get_window_titles = get_window_titles
 
         self.setWindowTitle("Live Overlay Translator")
 
@@ -45,9 +40,7 @@ class MainWindow(QMainWindow):
         
         # Create buttons for opening and closing the sub window
         self.start_button = QPushButton("Start Capture")
-        self.start_button.clicked.connect(self.open_sub_window)
         self.stop_button = QPushButton("Stop Capture")
-        self.stop_button.clicked.connect(self.close_sub_window)
         
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
@@ -56,39 +49,27 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
+        self.logger.debug("initialized")
+
     def update_text(self, text):
+        self.logger.debug("selected window changed to: %s", text)
         self.selected_window = text
 
-    def open_sub_window(self):
-        if self.sub_window is None:
-            self.sub_window = OverlayWindow(self.selected_window)
-            self.sub_window.show()
-            self.capture_thread = CaptureThread(self.selected_window, self.process_frame)
-            self.capture_thread.start()
-
-    def close_sub_window(self):
-        if self.sub_window:
-            self.capture_thread.stop()
-            self.capture_thread = None
-            self.sub_window.close()
-            self.sub_window = None
+    def add_start_listener(self, listener):
+        self.start_button.clicked.connect(listener)
+    
+    def add_stop_listener(self, listener):
+        self.stop_button.clicked.connect(listener)
 
     def closeEvent(self, event):
-        if self.sub_window is not None:
-            self.sub_window.close()
+        self.logger.debug("closing")
+        self.stop_button.click()
         super().closeEvent(event)
-    
-    def process_frame(self, frame_buffer):
-        """Process captured frame"""
-        result = self.ocr.recognize_text(frame_buffer)
-        
-        if result is not None:
-            self.sub_window.update_results(result)
 
     def refresh_window_list(self):
         """Refresh the window titles in the combobox"""
         current = self.combobox.currentText()
-        window_titles = get_window_titles()
+        window_titles = self.get_window_titles()
         
         self.combobox.clear()
         self.combobox.addItems(window_titles)

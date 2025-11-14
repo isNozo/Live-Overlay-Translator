@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt, QTimer
 from PySide6 import QtGui, QtCore
+from PySide6.QtGui import QCursor
 from helpers import get_window_rect
 
 class OverlayWindow(QWidget):
@@ -45,6 +46,18 @@ class OverlayWindow(QWidget):
         if rect:
             self.setGeometry(*rect)
 
+        # Global coordinates (position on the entire screen)
+        global_pos = QCursor.pos()
+
+        # Window's top-left position (in global coordinates)
+        window_pos = self.geometry().topLeft()
+
+        # Calculate relative position within the window
+        self.relative_x = global_pos.x() - window_pos.x()
+        self.relative_y = global_pos.y() - window_pos.y()
+
+        self.update()
+
     def update_results(self, result):
         self.results = result
         self.update()
@@ -66,9 +79,6 @@ class OverlayWindow(QWidget):
         font = QtGui.QFont("Arial", 10)
         painter.setFont(font)
 
-        # Set text background brush
-        text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 180))
-
         for textbox in self.results:
             # Position text inside the box
             text = f"{textbox.text}"
@@ -84,8 +94,13 @@ class OverlayWindow(QWidget):
                 textbox.h
             )
             
+            # mouse over check
+            if (self.relative_x >= textbox.x and self.relative_x <= textbox.x + textbox.w and
+                self.relative_y >= textbox.y and self.relative_y <= textbox.y + textbox.h):
+                text_bg = QtGui.QBrush(QtGui.QColor(255, 0, 0, 127))
+                painter.drawText(text_position, text)
+            else:
+                text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 127))
+            
             # Draw text background
             painter.fillRect(bg_rect, text_bg)
-            
-            # Draw text
-            painter.drawText(text_position, text)

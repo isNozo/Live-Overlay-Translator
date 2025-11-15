@@ -4,17 +4,19 @@ from main_window import MainWindow
 from overlay_window import OverlayWindow
 from window_capture import CaptureThread
 from text_recognition import TextRecognizer
+from translator import Translator
 from helpers import get_window_titles
 
 sub_window = None
 capture_thread = None
+translator = Translator()
 
 def open_sub_window():
     global sub_window
     global capture_thread
 
     if sub_window is None:
-        sub_window = OverlayWindow(main_window.selected_window)
+        sub_window = OverlayWindow(main_window.selected_window, translator)
         sub_window.show()
         capture_thread = CaptureThread(main_window.selected_window, process_frame)
         capture_thread.start()

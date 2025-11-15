@@ -1,14 +1,15 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QToolTip
 from PySide6.QtCore import Qt, QTimer
 from PySide6 import QtGui, QtCore
 from PySide6.QtGui import QCursor
 from helpers import get_window_rect
 
 class OverlayWindow(QWidget):
-    def __init__(self, target_title):
+    def __init__(self, target_title, translator):
         super().__init__()
         self.target_title = target_title
         self.results = []
+        self.translator = translator
         
         # Set a frameless, always-on-top transparent window
         self.setWindowFlags(
@@ -71,21 +72,11 @@ class OverlayWindow(QWidget):
         painter.setPen(pen)
         painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
 
-        # Set pen for drawing text and boxes
+        # Set pen for drawing
         pen = QtGui.QPen(QtGui.QColor(0, 255, 0, 200), 2)
         painter.setPen(pen)
 
-        # Set font
-        font = QtGui.QFont("Arial", 10)
-        painter.setFont(font)
-
         for textbox in self.results:
-            # Position text inside the box
-            text = f"{textbox.text}"
-            text_x = textbox.x
-            text_y = textbox.y + 12
-            text_position = QtCore.QPointF(text_x, text_y)
-            
             # Calculate background rectangle
             bg_rect = QtCore.QRectF(
                 textbox.x,
@@ -98,9 +89,9 @@ class OverlayWindow(QWidget):
             if (self.relative_x >= textbox.x and self.relative_x <= textbox.x + textbox.w and
                 self.relative_y >= textbox.y and self.relative_y <= textbox.y + textbox.h):
                 text_bg = QtGui.QBrush(QtGui.QColor(255, 0, 0, 127))
-                painter.drawText(text_position, text)
+                QToolTip.showText(QCursor.pos(), self.translator.translate_text(f"{textbox.text}"))
             else:
                 text_bg = QtGui.QBrush(QtGui.QColor(0, 0, 0, 127))
             
             # Draw text background
-            painter.fillRect(bg_rect, text_bg)
+            # painter.fillRect(bg_rect, text_bg)
